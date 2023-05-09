@@ -19,9 +19,15 @@ Scrapes [KIT Mensa Speiseplan](https://www.sw-ka.de/en/hochschulgastronomie/spei
 
 ```java
 public static void main(String[]args) {
-    final var mensa = new KITMensaScraper();
-    final var meals = mensa.fetchMeals(MensaLocation.ADENAUERRING, LocalDate.now());
+    final KITMensaScraper mensa = new KITMensaScraper();
+    final List<MensaMeal> meals = mensa.fetchMeals(MensaLocation.ADENAUERRING, LocalDate.now());
     meals.forEach(System.out::println);
+    
+    // serialize to json
+    final String mealsJson = KITMensaScraper.toJson();
+    
+    // deserialize from json
+    final List<MensaMeal> meals2 = KITMensaScraper.fromJson(mealsJson);
 }
 ```
 

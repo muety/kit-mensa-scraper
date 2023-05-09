@@ -9,6 +9,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,12 +20,12 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class KITMensaScraperTest {
 
     @Mock
@@ -35,10 +37,15 @@ class KITMensaScraperTest {
     private KITMensaScraper sut;
 
     @BeforeEach
-    void setUp() throws IllegalAccessException {
+    void setUp() throws IllegalAccessException, IOException, InterruptedException {
         sut = new KITMensaScraper();
         FieldUtils.writeField(sut, "http", httpClient, true);
         FieldUtils.writeField(sut, "clock", Clock.fixed(Instant.parse("2023-05-09T17:00:00.00Z"), ZoneId.systemDefault()), true);
+
+        when(mockResponse.statusCode()).thenReturn(200);
+        when(mockResponse.uri()).thenReturn(URI.create("https://example.org"));
+        when(mockResponse.body()).then(i -> KITMensaScraperTest.class.getClassLoader().getResourceAsStream("example_adenauerring.html"));
+        when(httpClient.send(any(), any(HttpResponse.BodyHandlers.ofInputStream().getClass()))).thenReturn(mockResponse);
     }
 
     @AfterEach
@@ -47,12 +54,8 @@ class KITMensaScraperTest {
 
     @Test
     void testFetchMeals() throws IOException, InterruptedException {
-        when(mockResponse.statusCode()).thenReturn(200);
-        when(mockResponse.uri()).thenReturn(URI.create("https://example.org"));
-        when(mockResponse.body()).then(i -> KITMensaScraperTest.class.getClassLoader().getResourceAsStream("example_adenauerring.html"));
-        when(httpClient.send(any(), any(HttpResponse.BodyHandlers.ofInputStream().getClass()))).thenReturn(mockResponse);
-
         final ArgumentCaptor<HttpRequest> captor1 = ArgumentCaptor.forClass(HttpRequest.class);
+
         var tuesday = sut.fetchMeals(MensaLocation.ADENAUERRING, LocalDate.of(2023, Month.MAY, 9));
         var wednesday = sut.fetchMeals(MensaLocation.ADENAUERRING, LocalDate.of(2023, Month.MAY, 10));
 
@@ -76,15 +79,24 @@ class KITMensaScraperTest {
 
     @Test
     void testFetchMealsFailDayNotFound() throws IOException, InterruptedException {
-        when(mockResponse.statusCode()).thenReturn(200);
-        when(mockResponse.uri()).thenReturn(URI.create("https://example.org"));
-        when(mockResponse.body()).then(i -> KITMensaScraperTest.class.getClassLoader().getResourceAsStream("example_adenauerring.html"));
-        when(httpClient.send(any(), any(HttpResponse.BodyHandlers.ofInputStream().getClass()))).thenReturn(mockResponse);
         final ArgumentCaptor<HttpRequest> captor1 = ArgumentCaptor.forClass(HttpRequest.class);
 
         assertThrows(MensaScraperException.class, () -> sut.fetchMeals(MensaLocation.ADENAUERRING, LocalDate.of(2023, Month.MAY, 15)));
 
         verify(httpClient, times(1)).send(captor1.capture(), any());
         assertEquals("kw=20", captor1.getValue().uri().getQuery());
+    }
+
+    @Test
+    void testCaching() throws IOException, InterruptedException {
+        final var result1 = sut.fetchMeals(MensaLocation.ADENAUERRING, LocalDate.of(2023, Month.MAY, 9));
+        final var result2 = sut.fetchMeals(MensaLocation.ADENAUERRING, LocalDate.of(2023, Month.MAY, 9));
+        final var result3 = sut.fetchMeals(MensaLocation.ADENAUERRING, LocalDate.of(2023, Month.MAY, 10));
+
+        verify(httpClient, times(2)).send(any(), any());
+        assertEquals(result1, result2);  // list overrides equals to compare element-wise
+        assertEquals(result1.get(0), result2.get(0));
+        assertNotEquals(System.identityHashCode(result1), System.identityHashCode(result2));
+        assertNotEquals(System.identityHashCode(result1.get(0)), System.identityHashCode(result2.get(0)));
     }
 }

@@ -6,7 +6,7 @@
 
     <groupId>edu.kit.aifb.atks</groupId>
     <artifactId>mensascraper</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0</version>
 
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
@@ -18,6 +18,11 @@
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
             <version>1.16.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.10.1</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -41,7 +46,7 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.12.0</version>
-            <scope>test</scope>
+            <scope>test</scope>  <!-- currently only used for FieldUtils in tests, change to "compile" to use in library code -->
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -54,14 +59,14 @@
             <artifactId>maven-surefire-plugin</artifactId>
             <version>3.0.0-M7</version>
             <type>maven-plugin</type>
-            <scope>compile</scope>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-assembly-plugin</artifactId>
             <version>3.5.0</version>
             <type>maven-plugin</type>
-            <scope>compile</scope>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

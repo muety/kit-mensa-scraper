@@ -1,7 +1,7 @@
 package edu.kit.aifb.atks;
 
-import org.apache.maven.surefire.shared.lang3.SerializationUtils;
-import org.apache.maven.surefire.shared.lang3.tuple.Pair;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -24,7 +24,7 @@ public class KITMensaScraper {
 
     private final Clock clock;
     private final HttpClient http;
-    private final Map<Pair<MensaLocation, LocalDate>, List<MensaMeal>> cache;
+    private final Map<Tuple<MensaLocation, LocalDate>, List<MensaMeal>> cache;
     private boolean noCache;
 
     private static final String BASE_URL = "https://www.sw-ka.de/en/hochschulgastronomie/speiseplan";
@@ -43,9 +43,9 @@ public class KITMensaScraper {
     }
 
     public List<MensaMeal> fetchMeals(MensaLocation location, LocalDate day) {
-        var cacheKey = Pair.of(location, day);
+        var cacheKey = new Tuple<>(location, day);
         if (!noCache && cache.containsKey(cacheKey)) {
-            return cache.get(cacheKey).stream().map(SerializationUtils::clone).collect(Collectors.toList());
+            return cloneMeals(cache.get(cacheKey));
         }
 
         if (day.isBefore(LocalDate.now(clock))) {
@@ -69,11 +69,20 @@ public class KITMensaScraper {
             final Document doc = Jsoup.parse(response.body(), StandardCharsets.UTF_8.name(), response.uri().toString());
 
             final List<MensaMeal> meals = parseMeals(doc, day);
-            cache.put(cacheKey, meals.stream().map(SerializationUtils::clone).collect(Collectors.toList()));
+            cache.put(cacheKey, cloneMeals(meals));
             return meals;
         } catch (IOException | InterruptedException e) {
             throw new MensaScraperException("failed to fetch data", e);
         }
+    }
+
+    public static String toJson(List<MensaMeal> meals) {
+        return new Gson().toJson(meals);
+    }
+
+    public static List<MensaMeal> fromJson(String json) {
+        return new Gson().fromJson(json, new TypeToken<List<MensaMeal>>() {
+        }.getType());
     }
 
     private static List<MensaMeal> parseMeals(Element root, LocalDate day) {
@@ -208,5 +217,9 @@ public class KITMensaScraper {
                 .replace("g", "")
                 .strip();
         return Float.parseFloat(nutriText);
+    }
+
+    private static List<MensaMeal> cloneMeals(List<MensaMeal> meals) {
+        return fromJson(toJson(meals));
     }
 }
