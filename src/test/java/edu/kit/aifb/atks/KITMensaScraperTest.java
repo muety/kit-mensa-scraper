@@ -5,6 +5,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -13,13 +14,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class KITMensaScraperTest {
@@ -49,8 +51,12 @@ class KITMensaScraperTest {
         when(mockResponse.body()).then(i -> KITMensaScraperTest.class.getClassLoader().getResourceAsStream("example_adenauerring.html"));
         when(httpClient.send(any(), any(HttpResponse.BodyHandlers.ofInputStream().getClass()))).thenReturn(mockResponse);
 
+        final ArgumentCaptor<HttpRequest> captor1 = ArgumentCaptor.forClass(HttpRequest.class);
         var tuesday = sut.fetchMeals(MensaLocation.ADENAUERRING, LocalDate.of(2023, Month.MAY, 9));
         var wednesday = sut.fetchMeals(MensaLocation.ADENAUERRING, LocalDate.of(2023, Month.MAY, 10));
+
+        verify(httpClient, times(2)).send(captor1.capture(), any());
+        assertEquals("kw=19", captor1.getValue().uri().getQuery());
 
         assertEquals(23, tuesday.size());
         assertEquals(24, wednesday.size());
@@ -73,7 +79,11 @@ class KITMensaScraperTest {
         when(mockResponse.uri()).thenReturn(URI.create("https://example.org"));
         when(mockResponse.body()).then(i -> KITMensaScraperTest.class.getClassLoader().getResourceAsStream("example_adenauerring.html"));
         when(httpClient.send(any(), any(HttpResponse.BodyHandlers.ofInputStream().getClass()))).thenReturn(mockResponse);
+        final ArgumentCaptor<HttpRequest> captor1 = ArgumentCaptor.forClass(HttpRequest.class);
 
-        assertThrows(MensaScraperError.class, () -> sut.fetchMeals(MensaLocation.ADENAUERRING, LocalDate.of(2023, Month.MAY, 13)));
+        assertThrows(MensaScraperError.class, () -> sut.fetchMeals(MensaLocation.ADENAUERRING, LocalDate.of(2023, Month.MAY, 15)));
+
+        verify(httpClient, times(1)).send(captor1.capture(), any());
+        assertEquals("kw=20", captor1.getValue().uri().getQuery());
     }
 }
