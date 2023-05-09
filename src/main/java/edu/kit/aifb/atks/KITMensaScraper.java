@@ -1,5 +1,7 @@
 package edu.kit.aifb.atks;
 
+import org.apache.maven.surefire.shared.lang3.SerializationUtils;
+import org.apache.maven.surefire.shared.lang3.tuple.Pair;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -15,26 +17,36 @@ import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.temporal.WeekFields;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 public class KITMensaScraper {
 
     private final Clock clock;
     private final HttpClient http;
+    private final Map<Pair<MensaLocation, LocalDate>, List<MensaMeal>> cache;
+    private boolean noCache;
 
     private static final String BASE_URL = "https://www.sw-ka.de/en/hochschulgastronomie/speiseplan";
 
     public KITMensaScraper() {
         clock = Clock.systemDefaultZone();
+        cache = new HashMap<>();
         http = HttpClient.newBuilder()
                 .followRedirects(HttpClient.Redirect.NORMAL)
                 .build();
     }
 
+    public KITMensaScraper(boolean noCache) {
+        this();
+        this.noCache = noCache;
+    }
+
     public List<MensaMeal> fetchMeals(MensaLocation location, LocalDate day) {
+        var cacheKey = Pair.of(location, day);
+        if (!noCache && cache.containsKey(cacheKey)) {
+            return cache.get(cacheKey).stream().map(SerializationUtils::clone).toList();
+        }
+
         if (day.isBefore(LocalDate.now(clock))) {
             throw new MensaScraperError("you can only fetch data from today or later");  // TODO: proper exceptions
         }
@@ -56,7 +68,10 @@ public class KITMensaScraper {
             }
 
             final Document doc = Jsoup.parse(response.body(), StandardCharsets.UTF_8.name(), response.uri().toString());
-            return parseMeals(doc, day);
+
+            final List<MensaMeal> meals = parseMeals(doc, day);
+            cache.put(cacheKey, meals.stream().map(SerializationUtils::clone).toList());
+            return meals;
         } catch (IOException | InterruptedException e) {
             throw new MensaScraperError("failed to fetch data", e);
         }

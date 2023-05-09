@@ -5,11 +5,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class MensaMeal {
+public class MensaMeal implements Serializable {
 
     private String name;
     private MensaLine line;
@@ -25,4 +27,6 @@ public class MensaMeal {
 
     // TODO: implement additives
     // TODO: implement environment score
+
+
 }
