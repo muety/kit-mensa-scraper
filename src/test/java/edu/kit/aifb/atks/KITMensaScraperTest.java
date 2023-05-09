@@ -28,6 +28,7 @@ class KITMensaScraperTest {
 
     @Mock
     private HttpResponse<InputStream> mockResponse;
+
     @Spy
     private HttpClient httpClient;
 
@@ -70,7 +71,7 @@ class KITMensaScraperTest {
 
     @Test
     void testFetchMealsFailPast() {
-        assertThrows(MensaScraperError.class, () -> sut.fetchMeals(MensaLocation.ADENAUERRING, LocalDate.of(2023, Month.MAY, 8)));
+        assertThrows(MensaScraperException.class, () -> sut.fetchMeals(MensaLocation.ADENAUERRING, LocalDate.of(2023, Month.MAY, 8)));
     }
 
     @Test
@@ -81,7 +82,7 @@ class KITMensaScraperTest {
         when(httpClient.send(any(), any(HttpResponse.BodyHandlers.ofInputStream().getClass()))).thenReturn(mockResponse);
         final ArgumentCaptor<HttpRequest> captor1 = ArgumentCaptor.forClass(HttpRequest.class);
 
-        assertThrows(MensaScraperError.class, () -> sut.fetchMeals(MensaLocation.ADENAUERRING, LocalDate.of(2023, Month.MAY, 15)));
+        assertThrows(MensaScraperException.class, () -> sut.fetchMeals(MensaLocation.ADENAUERRING, LocalDate.of(2023, Month.MAY, 15)));
 
         verify(httpClient, times(1)).send(captor1.capture(), any());
         assertEquals("kw=20", captor1.getValue().uri().getQuery());

@@ -48,23 +48,21 @@ public class KITMensaScraper {
         }
 
         if (day.isBefore(LocalDate.now(clock))) {
-            throw new MensaScraperError("you can only fetch data from today or later");  // TODO: proper exceptions
+            throw new MensaScraperException("you can only fetch data from today or later");  // TODO: proper exceptions
         }
 
         final URI url = URI.create("%s/%s?kw=%d".formatted(BASE_URL, location.getKey(), day.get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear())));
         final HttpResponse<InputStream> response;
         try {
-            response = http.send(
-                    HttpRequest.newBuilder()
+            response = http.send(HttpRequest.newBuilder()
                             .GET()
                             .uri(url)
                             .header("Accept", "text/html")
                             .build(),
-                    HttpResponse.BodyHandlers.ofInputStream()
-            );
+                    HttpResponse.BodyHandlers.ofInputStream());
 
             if (response.statusCode() >= 400) {
-                throw new MensaScraperError("failed to fetch data, got status %d".formatted(response.statusCode()));
+                throw new MensaScraperException("failed to fetch data, got status %d".formatted(response.statusCode()));
             }
 
             final Document doc = Jsoup.parse(response.body(), StandardCharsets.UTF_8.name(), response.uri().toString());
@@ -73,11 +71,11 @@ public class KITMensaScraper {
             cache.put(cacheKey, meals.stream().map(SerializationUtils::clone).toList());
             return meals;
         } catch (IOException | InterruptedException e) {
-            throw new MensaScraperError("failed to fetch data", e);
+            throw new MensaScraperException("failed to fetch data", e);
         }
     }
 
-    private List<MensaMeal> parseMeals(Element root, LocalDate day) {
+    private static List<MensaMeal> parseMeals(Element root, LocalDate day) {
         final List<LocalDate> availableDays = root.selectXpath("//a[contains(@id, 'canteen_day_nav_')]")
                 .stream()
                 .map(e -> e.attr("rel"))
@@ -86,18 +84,18 @@ public class KITMensaScraper {
 
         final int dateIndex = availableDays.indexOf(day);
         if (dateIndex < 0) {
-            throw new MensaScraperError("failed to fetch data for %s, maybe too far in the future?".formatted(day.toString()));
+            throw new MensaScraperException("failed to fetch data for %s, maybe too far in the future?".formatted(day.toString()));
         }
 
         final Elements dayRows = root.selectXpath("//div[@id='canteen_day_%d']/table/tbody/tr".formatted(dateIndex + 1));
         return dayRows.stream()
                 .parallel()
-                .map(this::parseSingleLine)
+                .map(KITMensaScraper::parseSingleLine)
                 .flatMap(Collection::stream)
                 .toList();
     }
 
-    private List<MensaMeal> parseSingleLine(Element el) {
+    private static List<MensaMeal> parseSingleLine(Element el) {
         final List<MensaMeal> meals = new LinkedList<>();
 
         final String lineTitle = el.selectXpath("./td/div").text().toLowerCase();
@@ -124,7 +122,7 @@ public class KITMensaScraper {
             if (isNutrition) {
                 // parse nutrition info
                 if (currentMeal == null) {
-                    throw new MensaScraperError("got nutrition table without preceding meal");
+                    throw new MensaScraperException("got nutrition table without preceeding meal");
                 }
                 currentMeal.setKcal(parseKcal(mealRow));
                 currentMeal.setProteins(parseProteins(mealRow));
@@ -151,11 +149,11 @@ public class KITMensaScraper {
         return meals;
     }
 
-    private String parseMealName(Element el) {
+    private static String parseMealName(Element el) {
         return el.selectXpath(".//td[contains(@class, 'menu-title')]//b").text();
     }
 
-    private float parseMealPrice(Element el) {
+    private static float parseMealPrice(Element el) {
         final String priceText = el.selectXpath(".//span[contains(@class, 'price_1')]").text()
                 .replace("€", "")
                 .replace(",", ".")
@@ -163,7 +161,7 @@ public class KITMensaScraper {
         return !priceText.isEmpty() ? Float.parseFloat(priceText) : 0.0f;
     }
 
-    private MensaMealType parseMealType(Element el) {
+    private static MensaMealType parseMealType(Element el) {
         if (!el.selectXpath(".//img[contains(@title, 'Schweinefleisch')]").isEmpty()) return MensaMealType.PORK;
         if (!el.selectXpath(".//img[contains(@title, 'Rindfleisch')]").isEmpty()) return MensaMealType.BEEF;
         if (!el.selectXpath(".//img[contains(@title, 'vegetarisch')]").isEmpty()) return MensaMealType.VEGETARIAN;
@@ -172,7 +170,7 @@ public class KITMensaScraper {
         return MensaMealType.NONE;
     }
 
-    private float parseKcal(Element el) {
+    private static float parseKcal(Element el) {
         final String kcalText = el.selectXpath(".//div[@class='energie']/div[2]").text()
                 .split("/")[1]
                 .replace("kcal", "")
@@ -180,31 +178,31 @@ public class KITMensaScraper {
         return !kcalText.isEmpty() ? Float.parseFloat(kcalText) : 0.0f;
     }
 
-    private float parseProteins(Element el) {
+    private static float parseProteins(Element el) {
         return parseNutrient(el, "proteine");
     }
 
-    private float parseCarbs(Element el) {
+    private static float parseCarbs(Element el) {
         return parseNutrient(el, "kohlenhydrate");
     }
 
-    private float parseSugar(Element el) {
+    private static float parseSugar(Element el) {
         return parseNutrient(el, "zucker");
     }
 
-    private float parseFat(Element el) {
+    private static float parseFat(Element el) {
         return parseNutrient(el, "fett");
     }
 
-    private float parseSaturated(Element el) {
+    private static float parseSaturated(Element el) {
         return parseNutrient(el, "gesaettigt");
     }
 
-    private float parseSalt(Element el) {
+    private static float parseSalt(Element el) {
         return parseNutrient(el, "salz");
     }
 
-    private float parseNutrient(Element el, String key) {
+    private static float parseNutrient(Element el, String key) {
         final String nutriText = el.selectXpath(".//div[@class='%s']/div[2]".formatted(key)).text()
                 .replace("g", "")
                 .strip();
