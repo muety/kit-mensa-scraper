@@ -18,6 +18,7 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.temporal.WeekFields;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class KITMensaScraper {
 
@@ -44,14 +45,14 @@ public class KITMensaScraper {
     public List<MensaMeal> fetchMeals(MensaLocation location, LocalDate day) {
         var cacheKey = Pair.of(location, day);
         if (!noCache && cache.containsKey(cacheKey)) {
-            return cache.get(cacheKey).stream().map(SerializationUtils::clone).toList();
+            return cache.get(cacheKey).stream().map(SerializationUtils::clone).collect(Collectors.toList());
         }
 
         if (day.isBefore(LocalDate.now(clock))) {
             throw new MensaScraperException("you can only fetch data from today or later");  // TODO: proper exceptions
         }
 
-        final URI url = URI.create("%s/%s?kw=%d".formatted(BASE_URL, location.getKey(), day.get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear())));
+        final URI url = URI.create(String.format("%s/%s?kw=%d", BASE_URL, location.getKey(), day.get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear())));
         final HttpResponse<InputStream> response;
         try {
             response = http.send(HttpRequest.newBuilder()
@@ -62,13 +63,13 @@ public class KITMensaScraper {
                     HttpResponse.BodyHandlers.ofInputStream());
 
             if (response.statusCode() >= 400) {
-                throw new MensaScraperException("failed to fetch data, got status %d".formatted(response.statusCode()));
+                throw new MensaScraperException(String.format("failed to fetch data, got status %d", response.statusCode()));
             }
 
             final Document doc = Jsoup.parse(response.body(), StandardCharsets.UTF_8.name(), response.uri().toString());
 
             final List<MensaMeal> meals = parseMeals(doc, day);
-            cache.put(cacheKey, meals.stream().map(SerializationUtils::clone).toList());
+            cache.put(cacheKey, meals.stream().map(SerializationUtils::clone).collect(Collectors.toList()));
             return meals;
         } catch (IOException | InterruptedException e) {
             throw new MensaScraperException("failed to fetch data", e);
@@ -80,19 +81,19 @@ public class KITMensaScraper {
                 .stream()
                 .map(e -> e.attr("rel"))
                 .map(LocalDate::parse)
-                .toList();
+                .collect(Collectors.toList());
 
         final int dateIndex = availableDays.indexOf(day);
         if (dateIndex < 0) {
-            throw new MensaScraperException("failed to fetch data for %s, maybe too far in the future?".formatted(day.toString()));
+            throw new MensaScraperException(String.format("failed to fetch data for %s, maybe too far in the future?", day.toString()));
         }
 
-        final Elements dayRows = root.selectXpath("//div[@id='canteen_day_%d']/table/tbody/tr".formatted(dateIndex + 1));
+        final Elements dayRows = root.selectXpath(String.format("//div[@id='canteen_day_%d']/table/tbody/tr", dateIndex + 1));
         return dayRows.stream()
                 .parallel()
                 .map(KITMensaScraper::parseSingleLine)
                 .flatMap(Collection::stream)
-                .toList();
+                .collect(Collectors.toList());
     }
 
     private static List<MensaMeal> parseSingleLine(Element el) {
@@ -203,7 +204,7 @@ public class KITMensaScraper {
     }
 
     private static float parseNutrient(Element el, String key) {
-        final String nutriText = el.selectXpath(".//div[@class='%s']/div[2]".formatted(key)).text()
+        final String nutriText = el.selectXpath(String.format(".//div[@class='%s']/div[2]", key)).text()
                 .replace("g", "")
                 .strip();
         return Float.parseFloat(nutriText);
