@@ -4,6 +4,10 @@ import lombok.*;
 
 import java.io.Serializable;
 
+/**
+ * Data class to capture all available information about a meal. Use getter methods (e.g. {@code getName()}) to access properties.
+ * Prices are in Euro, nutrition facts are in grams.
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

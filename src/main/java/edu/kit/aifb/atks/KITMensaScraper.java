@@ -20,6 +20,9 @@ import java.time.temporal.WeekFields;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * A scraper to fetch the meal menu for <a href="https://www.sw-ka.de/en/hochschulgastronomie/speiseplan">Studierendenwerk Karlsruhe</a> canteens.
+ */
 public class KITMensaScraper {
 
     private final Clock clock;
@@ -29,6 +32,9 @@ public class KITMensaScraper {
 
     private static final String BASE_URL = "https://www.sw-ka.de/en/hochschulgastronomie/speiseplan";
 
+    /**
+     * Create new default scraper instance.
+     */
     public KITMensaScraper() {
         clock = Clock.systemDefaultZone();
         cache = new HashMap<>();
@@ -37,11 +43,22 @@ public class KITMensaScraper {
                 .build();
     }
 
+    /**
+     * Create new scraper instance and control caching behavior.
+     * @param noCache Whether to cache per-day meal menus. If {@code true}, requesting meals for same canteen and same day will only result in one fetch operation.
+     */
     public KITMensaScraper(boolean noCache) {
         this();
         this.noCache = noCache;
     }
 
+    /**
+     * Fetch list of meals for a given canteen and given day. Currently, only "Mensa am Adenauerring" is supported. Note that you cannot request data for past days.
+     * @param location Which canteen (aka. Mensa) to request meals for.
+     * @param day Which date to request meals for. Must be larger or equal than today ({@code LocalDate.now()}). Usually, only data for the upcoming 5 weeks is available.
+     * @return List of meals or empty list if no data is available.
+     * @throws MensaScraperException Thrown if requested date is invalid or if anything else went wrong while downloading and parsing the menu.
+     */
     public List<MensaMeal> fetchMeals(MensaLocation location, LocalDate day) {
         var cacheKey = new Tuple<>(location, day);
         if (!noCache && cache.containsKey(cacheKey)) {
@@ -76,10 +93,20 @@ public class KITMensaScraper {
         }
     }
 
+    /**
+     * Serialize a list of meals to a JSON string.
+     * @param meals List of meal to marshal.
+     * @return JSON string.
+     */
     public static String toJson(List<MensaMeal> meals) {
         return new Gson().toJson(meals);
     }
 
+    /**
+     * Deserialize a list of mensa meals from a JSON string.
+     * @param json JSON string.
+     * @return List of {@link MensaMeal} items.
+     */
     public static List<MensaMeal> fromJson(String json) {
         return new Gson().fromJson(json, new TypeToken<List<MensaMeal>>() {
         }.getType());
