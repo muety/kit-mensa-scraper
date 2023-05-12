@@ -1,7 +1,5 @@
 package edu.kit.aifb.atks;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -74,15 +72,6 @@ public class KITMensaScraper {
         } catch (IOException | InterruptedException e) {
             throw new MensaScraperException("failed to fetch data", e);
         }
-    }
-
-    public static String toJson(List<MensaMeal> meals) {
-        return new Gson().toJson(meals);
-    }
-
-    public static List<MensaMeal> fromJson(String json) {
-        return new Gson().fromJson(json, new TypeToken<List<MensaMeal>>() {
-        }.getType());
     }
 
     private static List<MensaMeal> parseMeals(Element root, LocalDate day) {
@@ -220,6 +209,6 @@ public class KITMensaScraper {
     }
 
     private static List<MensaMeal> cloneMeals(List<MensaMeal> meals) {
-        return fromJson(toJson(meals));
+        return meals.stream().map(MensaMeal::copy).collect(Collectors.toList());
     }
 }

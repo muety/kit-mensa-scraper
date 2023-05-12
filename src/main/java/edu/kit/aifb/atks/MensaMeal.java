@@ -3,13 +3,15 @@ package edu.kit.aifb.atks;
 import lombok.*;
 
 import java.io.Serializable;
+import java.util.Random;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode
+@With
 @Builder
-public class MensaMeal implements Serializable {
+public class MensaMeal implements Serializable, Cloneable {
 
     private String name;
     private MensaLine line;
@@ -26,5 +28,12 @@ public class MensaMeal implements Serializable {
     // TODO: implement additives
     // TODO: implement environment score
 
+    public MensaMeal copy() {
+        return withPrice(new Random().nextFloat()).withPrice(price);  // hacky way of creating a clone in one line
+    }
 
+    @Override
+    protected Object clone() {
+        return copy();
+    }
 }
