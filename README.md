@@ -25,12 +25,6 @@ public static void main(String[]args) {
     final KITMensaScraper mensa = new KITMensaScraper();
     final List<MensaMeal> meals = mensa.fetchMeals(MensaLocation.ADENAUERRING, LocalDate.now());
     meals.forEach(System.out::println);
-    
-    // serialize to json
-    final String mealsJson = KITMensaScraper.toJson();
-    
-    // deserialize from json
-    final List<MensaMeal> meals2 = KITMensaScraper.fromJson(mealsJson);
 }
 ```
 
