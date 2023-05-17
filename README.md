@@ -21,6 +21,8 @@ JavaDoc available [here](https://docs.muetsch.io/kit-mensa-scraper/edu/kit/aifb/
 ## Usage Example
 
 ```java
+import edu.kit.aifb.atks.mensascraper.lib.*;
+
 public static void main(String[]args) {
     final KITMensaScraper mensa = new KITMensaScraper();
     final List<MensaMeal> meals = mensa.fetchMeals(MensaLocation.ADENAUERRING, LocalDate.now());
@@ -58,7 +60,16 @@ MensaMeal(name=Pizza Margherita vegetarisch - frische Tomaten, Mozzarella, Basil
 ## Build
 
 ```bash
-mvn clean package
+./mvnw clean package
+```
+
+## CLI
+We also provide a very minimalistic command-line application to run the scraper for a given day.
+
+### Usage
+```bash
+./mvnw clean package
+java -jar cli/target/*dependencies.jar 2023-05-17 > 2023-05-17.json
 ```
 
 ## License
