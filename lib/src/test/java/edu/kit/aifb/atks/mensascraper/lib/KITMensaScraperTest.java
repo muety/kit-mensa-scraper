@@ -78,10 +78,11 @@ class KITMensaScraperTest {
     }
 
     @Test
-    void testFetchMealsFailDayNotFound() throws IOException, InterruptedException {
+    void testFetchMealsEmptyMenu() throws IOException, InterruptedException {
         final ArgumentCaptor<HttpRequest> captor1 = ArgumentCaptor.forClass(HttpRequest.class);
 
-        assertThrows(MensaScraperException.class, () -> sut.fetchMeals(MensaLocation.ADENAUERRING, LocalDate.of(2023, Month.MAY, 15)));
+        final var result = sut.fetchMeals(MensaLocation.ADENAUERRING, LocalDate.of(2023, Month.MAY, 15));
+        assertTrue(result.isEmpty());
 
         verify(httpClient, times(1)).send(captor1.capture(), any());
         assertEquals("kw=20", captor1.getValue().uri().getQuery());

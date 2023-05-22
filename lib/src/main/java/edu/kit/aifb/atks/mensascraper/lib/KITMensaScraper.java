@@ -100,7 +100,7 @@ public class KITMensaScraper {
 
         final int dateIndex = availableDays.indexOf(day);
         if (dateIndex < 0) {
-            throw new MensaScraperException(String.format("failed to fetch data for %s, maybe too far in the future?", day.toString()));
+            return List.of();
         }
 
         final Elements dayRows = root.selectXpath(String.format("//div[@id='canteen_day_%d']/table/tbody/tr", dateIndex + 1));
