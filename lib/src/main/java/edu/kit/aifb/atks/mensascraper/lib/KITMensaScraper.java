@@ -155,6 +155,7 @@ public class KITMensaScraper {
 
                 currentMeal = new MensaMeal();
                 currentMeal.setName(parseMealName(mealRow));
+                currentMeal.setAdditives(parseMealAdditives(mealRow));
                 currentMeal.setPrice(parseMealPrice(mealRow));
                 currentMeal.setType(parseMealType(mealRow));
             }
@@ -167,6 +168,15 @@ public class KITMensaScraper {
 
     private static String parseMealName(Element el) {
         return el.selectXpath(".//td[contains(@class, 'menu-title')]//b").text();
+    }
+
+    private static List<String> parseMealAdditives(Element el) {
+        return Arrays.stream(
+                el.selectXpath(".//td[contains(@class, 'menu-title')]//sup").text()
+                        .replace("[", "")
+                        .replace("]", "")
+                        .split(",")
+        ).collect(Collectors.toList());
     }
 
     private static float parseMealPrice(Element el) {

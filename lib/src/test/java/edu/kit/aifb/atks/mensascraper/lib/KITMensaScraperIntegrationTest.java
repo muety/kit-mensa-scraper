@@ -36,6 +36,7 @@ class KITMensaScraperIntegrationTest {
         var result = sut.fetchMeals(MensaLocation.ADENAUERRING, targetDate);
         assertFalse(result.isEmpty());
         assertTrue(result.stream().noneMatch(m -> m.getName().isBlank()));
+        assertTrue(result.stream().anyMatch(m -> !m.getAdditives().isEmpty()));
         assertTrue(result.stream().anyMatch(m -> m.getPrice() > 0f));
         assertTrue(result.stream().anyMatch(m -> m.getKcal() > 0f));
         assertTrue(result.stream().anyMatch(m -> !m.getLine().equals(MensaLine.UNKNOWN)));

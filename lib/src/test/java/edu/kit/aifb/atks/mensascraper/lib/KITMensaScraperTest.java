@@ -65,6 +65,8 @@ class KITMensaScraperTest {
         assertEquals(23, tuesday.size());
         assertEquals(24, wednesday.size());
         assertEquals("Mini Frühlingsrollen mit Sweet Chili Soße und Mienudeln", tuesday.get(2).getName());
+        assertEquals(3, tuesday.get(2).getAdditives().size());
+        assertEquals("Sa", tuesday.get(2).getAdditives().get(0));
         assertEquals(3.8f, tuesday.get(2).getPrice());
         assertEquals(1147.0f, tuesday.get(2).getKcal());
         assertEquals(23.0f, tuesday.get(2).getProteins());

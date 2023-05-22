@@ -12,7 +12,7 @@ Scrapes [KIT Mensa Speiseplan](https://www.sw-ka.de/en/hochschulgastronomie/spei
 * [x] Type (pork, vegan, etc.)
 * [x] Line
 * [x] Nutrients
-* [ ] Additives
+* [x] Additives
 * [ ] Environment Score
 
 ## API Documentation
