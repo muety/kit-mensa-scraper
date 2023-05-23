@@ -31,8 +31,9 @@ jobs:
           JAR_PATH: 'cli/cli-*-dependencies.jar'
         run: bash fetch.sh
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+      - name: Commit
+        uses: EndBug/add-and-commit@v9
         with:
-          name: archive
-          path: archive
+          default_author: github_actions
+          add: 'archive'
+          message: 'data: fetch latest meals'
