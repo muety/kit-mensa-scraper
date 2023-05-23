@@ -1,0 +1,38 @@
+name: Fetch meals
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+jobs:
+  fetch_meals:
+    name: Fetch meals for 7 days
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Download CLI JAR
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow: ci.yml
+          workflow_conclusion: success
+
+      - name: Run scraper
+        shell: bash
+        env:
+          NUM_DAYS: '7'
+          JAR_PATH: 'cli-*-dependencies.jar'
+        run: bash fetch.sh
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: archive
+          path: archive
