@@ -1,6 +1,6 @@
 # 🐮🌱 kit-mensa-scraper
 
-Scrapes [KIT Mensa Speiseplan](https://www.sw-ka.de/en/hochschulgastronomie/speiseplan). Currently, only "Mensa am Adenauerring" is supported.
+Scrapes [KIT Mensa Speiseplan](https://www.sw-ka.de/en/hochschulgastronomie/speiseplan). Currently, only "Mensa am Adenauerring" is supported. Upcoming 7 days' menus are available as JSON at [in this repo](archive) as well.
 
 ## Requirements
 * Java >= 11
