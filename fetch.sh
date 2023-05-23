@@ -8,5 +8,8 @@ d=$(date +%Y-%m-%d)
 for i in $(seq 1 $num_days); do
   echo "fetching $d ..."
   java -jar $jar_path $d > "$out_path/$d.json"
+  if [ $? != 0 ]; then
+      exit 1
+  fi
   d=$(date -d "$d + 1 day" +%Y-%m-%d)
 done

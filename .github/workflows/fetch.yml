@@ -28,7 +28,7 @@ jobs:
         shell: bash
         env:
           NUM_DAYS: '7'
-          JAR_PATH: 'cli-*-dependencies.jar'
+          JAR_PATH: 'cli/cli-*-dependencies.jar'
         run: bash fetch.sh
 
       - name: Upload artifacts
