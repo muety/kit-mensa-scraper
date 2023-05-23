@@ -106,6 +106,7 @@ public class KITMensaScraper {
         final Elements dayRows = root.selectXpath(String.format("//div[@id='canteen_day_%d']/table/tbody/tr", dateIndex + 1));
         return dayRows.stream()
                 .parallel()
+                .peek(e -> e.parents().remove())
                 .map(KITMensaScraper::parseSingleLine)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
@@ -133,7 +134,7 @@ public class KITMensaScraper {
 
         MensaMeal currentMeal = null;
         for (Element mealRow : mealRows) {
-            final boolean isNutrition = !mealRow.selectXpath(".//td[contains(@class, 'nutrition_facts_row')]").isEmpty();
+            final boolean isNutrition = mealRow.selectXpath("./td[1]").hasClass("nutrition_facts_row");
 
             if (isNutrition) {
                 // parse nutrition info
