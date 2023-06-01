@@ -65,6 +65,7 @@ class KITMensaScraperTest {
         assertEquals(23, tuesday.size());
         assertEquals(24, wednesday.size());
         assertEquals("Mini Frühlingsrollen mit Sweet Chili Soße und Mienudeln", tuesday.get(2).getName());
+        assertEquals("Hausgemachte Gnocchi in Bechamelsoße mit Chorizo", tuesday.get(5).getName());  // bold + normal font
         assertEquals(3, tuesday.get(2).getAdditives().size());
         assertEquals("Sa", tuesday.get(2).getAdditives().get(0));
         assertEquals(3.8f, tuesday.get(2).getPrice());

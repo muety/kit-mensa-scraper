@@ -168,7 +168,7 @@ public class KITMensaScraper {
     }
 
     private static String parseMealName(Element el) {
-        return el.selectXpath(".//td[contains(@class, 'menu-title')]//b").text();
+        return el.selectXpath(".//td[contains(@class, 'menu-title')]/span").text();
     }
 
     private static List<String> parseMealAdditives(Element el) {
