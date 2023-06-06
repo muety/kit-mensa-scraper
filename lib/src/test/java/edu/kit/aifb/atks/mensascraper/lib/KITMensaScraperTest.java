@@ -69,7 +69,9 @@ class KITMensaScraperTest {
         assertEquals(3, tuesday.get(2).getAdditives().size());
         assertEquals("Sa", tuesday.get(2).getAdditives().get(0));
         assertEquals(3.8f, tuesday.get(2).getPrice());
+        assertEquals(3.5f, tuesday.get(5).getPrice());
         assertEquals(1147.0f, tuesday.get(2).getKcal());
+        assertEquals(1121.0f, tuesday.get(5).getKcal());
         assertEquals(23.0f, tuesday.get(2).getProteins());
         assertEquals(MensaLine.LINIE_2, tuesday.get(2).getLine());
         assertEquals(MensaMealType.VEGAN, tuesday.get(2).getType());

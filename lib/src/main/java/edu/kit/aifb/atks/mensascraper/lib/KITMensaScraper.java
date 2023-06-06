@@ -184,6 +184,7 @@ public class KITMensaScraper {
         final String priceText = el.selectXpath(".//span[contains(@class, 'price_1')]").text()
                 .replace("€", "")
                 .replace(",", ".")
+                .replaceAll("[a-zA-Z]", "")
                 .strip();
         return !priceText.isEmpty() ? Float.parseFloat(priceText) : 0.0f;
     }
@@ -201,6 +202,7 @@ public class KITMensaScraper {
         final String kcalText = el.selectXpath(".//div[@class='energie']/div[2]").text()
                 .split("/")[1]
                 .replace("kcal", "")
+                .replaceAll("[a-zA-Z]]", "")
                 .strip();
         return !kcalText.isEmpty() ? Float.parseFloat(kcalText) : 0.0f;
     }
@@ -232,6 +234,7 @@ public class KITMensaScraper {
     private static float parseNutrient(Element el, String key) {
         final String nutriText = el.selectXpath(String.format(".//div[@class='%s']/div[2]", key)).text()
                 .replace("g", "")
+                .replaceAll("[a-zA-Z]]", "")
                 .strip();
         return Float.parseFloat(nutriText);
     }
