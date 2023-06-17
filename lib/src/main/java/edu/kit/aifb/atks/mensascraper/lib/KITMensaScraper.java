@@ -104,9 +104,9 @@ public class KITMensaScraper {
         }
 
         final Elements dayRows = root.selectXpath(String.format("//div[@id='canteen_day_%d']/table/tbody/tr", dateIndex + 1));
+        Optional.ofNullable(dayRows.first()).ifPresent(d -> d.parents().remove());
         return dayRows.stream()
                 .parallel()
-                .peek(e -> e.parents().remove())
                 .map(KITMensaScraper::parseSingleLine)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
