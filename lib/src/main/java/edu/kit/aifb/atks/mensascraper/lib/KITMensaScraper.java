@@ -109,6 +109,8 @@ public class KITMensaScraper {
                 .parallel()
                 .map(KITMensaScraper::parseSingleLine)
                 .flatMap(Collection::stream)
+                .filter(m -> m.getPrice() > 0)
+                .distinct()
                 .collect(Collectors.toList());
     }
 
@@ -138,8 +140,9 @@ public class KITMensaScraper {
 
             if (isNutrition) {
                 // parse nutrition info
+                // nutrition info always comes second, after the meal entry
                 if (currentMeal == null) {
-                    throw new MensaScraperException("got nutrition table without preceeding meal");
+                    throw new MensaScraperException("got nutrition table without preceding meal");
                 }
                 currentMeal.setKcal(parseKcal(mealRow));
                 currentMeal.setProteins(parseProteins(mealRow));
@@ -150,15 +153,12 @@ public class KITMensaScraper {
                 currentMeal.setSalt(parseSalt(mealRow));
             } else {
                 // parse meal info
-                if (currentMeal != null) {
-                    meals.add(currentMeal);
-                }
-
                 currentMeal = new MensaMeal();
                 currentMeal.setName(parseMealName(mealRow));
                 currentMeal.setAdditives(parseMealAdditives(mealRow));
                 currentMeal.setPrice(parseMealPrice(mealRow));
                 currentMeal.setType(parseMealType(mealRow));
+                meals.add(currentMeal);
             }
         }
 

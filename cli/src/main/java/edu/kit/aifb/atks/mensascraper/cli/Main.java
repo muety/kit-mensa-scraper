@@ -11,7 +11,7 @@ public class Main {
         final var scraper = new KITMensaScraper();
         final var day = args.length > 0
                 ? LocalDate.parse(args[0])
-                : LocalDate.now();
+                : LocalDate.now();  // TODO: make time-zone aware -> always use "now" for time zone the requested mensa is located in
         final var meals = scraper.fetchMeals(MensaLocation.ADENAUERRING, day);
         System.out.println(new Gson().toJson(meals));
     }
