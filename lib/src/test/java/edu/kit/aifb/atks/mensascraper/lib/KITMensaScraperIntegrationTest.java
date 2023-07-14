@@ -40,6 +40,9 @@ class KITMensaScraperIntegrationTest {
         assertTrue(result.stream().anyMatch(m -> !m.getAdditives().isEmpty()));
         assertTrue(result.stream().anyMatch(m -> m.getPrice() > 0f));
         assertTrue(result.stream().anyMatch(m -> m.getKcal() > 0f));
+        assertTrue(result.stream().anyMatch(m -> m.getScoreCo2() > 0f));
+        assertTrue(result.stream().anyMatch(m -> m.getCo2Emissions() > 0f));
+        assertTrue(result.stream().anyMatch(m -> m.getWaterConsumption() > 0f));
         assertTrue(result.stream().anyMatch(m -> !m.getLine().equals(MensaLine.UNKNOWN)));
         assertTrue(result.stream().anyMatch(m -> !m.getType().equals(MensaMealType.NONE)));
     }

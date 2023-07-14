@@ -63,20 +63,27 @@ class KITMensaScraperTest {
         assertEquals("kw=19", captor1.getValue().uri().getQuery());
 
         assertEquals(32, tuesday.size());
-        assertEquals(32, wednesday.size());
         assertEquals(tuesday.size(), tuesday.stream().distinct().count());
-        assertEquals(wednesday.size(), wednesday.stream().distinct().count());
         assertEquals("Mini Frühlingsrollen mit Sweet Chili Soße und Mienudeln", tuesday.get(2).getName());
-        assertEquals("Hausgemachte Gnocchi in Bechamelsoße mit Chorizo", tuesday.get(6).getName());  // bold + normal font
-        assertEquals(3, tuesday.get(2).getAdditives().size());
         assertEquals("Sa", tuesday.get(2).getAdditives().get(0));
         assertEquals(3.8f, tuesday.get(2).getPrice());
-        assertEquals(3.5f, tuesday.get(6).getPrice());
         assertEquals(1147.0f, tuesday.get(2).getKcal());
-        assertEquals(1121.0f, tuesday.get(6).getKcal());
         assertEquals(23.0f, tuesday.get(2).getProteins());
+        assertEquals(2, tuesday.get(0).getScoreCo2());
+        assertEquals(3, tuesday.get(0).getScoreWater());
+        assertEquals(1, tuesday.get(0).getScoreAnimals());
+        assertEquals(3, tuesday.get(0).getScoreRainforest());
+        assertEquals(857f, tuesday.get(0).getCo2Emissions());
+        assertEquals(21.61f, tuesday.get(0).getWaterConsumption());
+        assertEquals(3, tuesday.get(2).getAdditives().size());
         assertEquals(MensaLine.LINIE_2, tuesday.get(2).getLine());
         assertEquals(MensaMealType.VEGAN, tuesday.get(2).getType());
+
+        assertEquals(32, wednesday.size());
+        assertEquals(wednesday.size(), wednesday.stream().distinct().count());
+        assertEquals("Hausgemachte Gnocchi in Bechamelsoße mit Chorizo", tuesday.get(6).getName());  // bold + normal font
+        assertEquals(3.5f, tuesday.get(6).getPrice());
+        assertEquals(1121.0f, tuesday.get(6).getKcal());
     }
 
     @Test

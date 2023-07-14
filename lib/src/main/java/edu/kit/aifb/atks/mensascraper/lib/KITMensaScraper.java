@@ -43,6 +43,7 @@ public class KITMensaScraper {
 
     /**
      * Create new scraper instance and control caching behavior.
+     *
      * @param noCache Whether to cache per-day meal menus. If {@code true}, requesting meals for same canteen and same day will only result in one fetch operation.
      */
     public KITMensaScraper(boolean noCache) {
@@ -52,8 +53,9 @@ public class KITMensaScraper {
 
     /**
      * Fetch list of meals for a given canteen and given day. Currently, only "Mensa am Adenauerring" is supported. Note that you cannot request data for past days.
+     *
      * @param location Which canteen (aka. Mensa) to request meals for.
-     * @param day Which date to request meals for. Must be larger or equal than today ({@code LocalDate.now()}). Usually, only data for the upcoming 5 weeks is available.
+     * @param day      Which date to request meals for. Must be larger or equal than today ({@code LocalDate.now()}). Usually, only data for the upcoming 5 weeks is available.
      * @return List of meals or empty list if no data is available.
      * @throws MensaScraperException Thrown if requested date is invalid or if anything else went wrong while downloading and parsing the menu.
      */
@@ -136,14 +138,15 @@ public class KITMensaScraper {
 
         MensaMeal currentMeal = null;
         for (Element mealRow : mealRows) {
-            final boolean isNutrition = mealRow.selectXpath("./td[1]").hasClass("nutrition_facts_row");
+            final boolean isDetailsSection = mealRow.selectXpath("./td[1]").hasClass("nutrition_facts_row");
 
-            if (isNutrition) {
-                // parse nutrition info
-                // nutrition info always comes second, after the meal entry
+            if (isDetailsSection) {
+                // nutrition info, etc. always comes second, after the meal entry
                 if (currentMeal == null) {
                     throw new MensaScraperException("got nutrition table without preceding meal");
                 }
+
+                // parse nutrition info
                 currentMeal.setKcal(parseKcal(mealRow));
                 currentMeal.setProteins(parseProteins(mealRow));
                 currentMeal.setCarbs(parseCarbs(mealRow));
@@ -151,6 +154,14 @@ public class KITMensaScraper {
                 currentMeal.setFat(parseFat(mealRow));
                 currentMeal.setSaturated(parseSaturated(mealRow));
                 currentMeal.setSalt(parseSalt(mealRow));
+
+                // parse environment scores
+                currentMeal.setScoreCo2(parseScoreCo2(mealRow));
+                currentMeal.setScoreWater(parseScoreWater(mealRow));
+                currentMeal.setScoreAnimals(parseScoreAnimalWelfare(mealRow));
+                currentMeal.setScoreRainforest(parseScoreRainforest(mealRow));
+                currentMeal.setCo2Emissions(parseCo2Emissions(mealRow));
+                currentMeal.setWaterConsumption(parseWaterConsumption(mealRow));
             } else {
                 // parse meal info
                 currentMeal = new MensaMeal();
@@ -239,7 +250,50 @@ public class KITMensaScraper {
         return Float.parseFloat(nutriText);
     }
 
+    private static short parseScoreCo2(Element el) {
+        final String ratingText = el.selectXpath(".//div[contains(@class, 'co2_bewertung')]/div[1]").attr("data-rating");
+        return !ratingText.isEmpty() ? Short.parseShort(ratingText) : 0;
+    }
+
+    private static short parseScoreWater(Element el) {
+        final String ratingText = el.selectXpath(".//div[contains(@class, 'wasser_bewertung')]/div[1]").attr("data-rating");
+        return !ratingText.isEmpty() ? Short.parseShort(ratingText) : 0;
+    }
+
+    private static short parseScoreAnimalWelfare(Element el) {
+        final String ratingText = el.selectXpath(".//div[contains(@class, 'tierwohl')]/div[1]").attr("data-rating");
+        return !ratingText.isEmpty() ? Short.parseShort(ratingText) : 0;
+    }
+
+    private static short parseScoreRainforest(Element el) {
+        final String ratingText = el.selectXpath(".//div[contains(@class, 'regenwald')]/div[1]").attr("data-rating");
+        return !ratingText.isEmpty() ? Short.parseShort(ratingText) : 0;
+    }
+
+    private static float parseCo2Emissions(Element el) {
+        final String emissionsText = el.selectXpath(".//div[contains(@class, 'co2_bewertung')]/div[3]").text()
+                .replaceAll("[^0-9,]+", "")
+                .replaceAll(",", ".")
+                .strip();
+        return !emissionsText.isEmpty() ? Float.parseFloat(emissionsText) : 0;
+    }
+
+    private static float parseWaterConsumption(Element el) {
+        final String consumptionText = el.selectXpath(".//div[contains(@class, 'wasser_bewertung')]/div[3]").text()
+                .replaceAll("[^0-9,]+", "")
+                .replaceAll(",", ".")
+                .strip();
+        return !consumptionText.isEmpty() ? Float.parseFloat(consumptionText) : 0;
+    }
+
     private static List<MensaMeal> cloneMeals(List<MensaMeal> meals) {
         return meals.stream().map(MensaMeal::copy).collect(Collectors.toList());
+    }
+
+    private static void allowFail(Runnable r) {
+        try {
+            r.run();
+        } catch (RuntimeException ignored) {
+        }
     }
 }

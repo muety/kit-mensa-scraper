@@ -74,6 +74,36 @@ public class MensaMeal implements Serializable, Cloneable {
     private float salt;
 
     /**
+     * Rating of emitted CO2 emissions of this meal (1-3 stars).
+     */
+    private short scoreCo2;
+
+    /**
+     * Rating of water consumption of this meal (1-3 stars).
+     */
+    private short scoreWater;
+
+    /**
+     * Animal welfare rating of this meal (1-3 stars).
+     */
+    private short scoreAnimals;
+
+    /**
+     * Rainforest friendliness score of this meal (1-3 stars).
+     */
+    private short scoreRainforest;
+
+    /**
+     * CO2 emissions of this meal in grams.
+     */
+    private float co2Emissions;
+
+    /**
+     * Water consumption of this meal in liters.
+     */
+    private float waterConsumption;
+
+    /**
      * List of additives / ingredients / allergens.
      * See <a href="https://www.sw-ka.de/media/?file=4458_liste_aller_gesetzlich_ausweisungspflichtigen_zusatzstoffe_und_allergene_fuer_website_160218.pdf">List of allergens</a>.
      */
@@ -83,6 +113,7 @@ public class MensaMeal implements Serializable, Cloneable {
 
     /**
      * Create a deep-copy of this object.
+     *
      * @return Deep-copy of this object.
      */
     public MensaMeal copy() {
