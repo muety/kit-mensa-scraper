@@ -210,8 +210,9 @@ public class KITMensaScraper {
     }
 
     private static float parseKcal(Element el) {
-        final String kcalText = el.selectXpath(".//div[@class='energie']/div[2]").text()
-                .split("/")[1]
+        final String kcalText = Arrays.stream(el.selectXpath(".//div[@class='energie']/div[2]").text().split("/"))
+                .skip(1)
+                .findFirst().orElse("")
                 .replaceAll("[^0-9,]", "")
                 .replaceAll(",", ".")
                 .strip();
@@ -247,7 +248,7 @@ public class KITMensaScraper {
                 .replaceAll("[^0-9,]", "")
                 .replaceAll(",", ".")
                 .strip();
-        return Float.parseFloat(nutriText);
+        return !nutriText.isEmpty() ? Float.parseFloat(nutriText) : 0.0f;
     }
 
     private static short parseScoreCo2(Element el) {
