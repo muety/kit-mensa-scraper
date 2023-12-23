@@ -6,6 +6,10 @@ on:
     paths-ignore:
       - 'archive/**'
   workflow_dispatch:
+    inputs:
+      skip_tests:
+        description: Skip tests
+        type: boolean
 
 jobs:
   lib_cli_package:
@@ -22,7 +26,12 @@ jobs:
           distribution: 'temurin'
 
       - name: Build and test
-        run: mvn clean package
+        run: |
+          if [[ ${{ inputs.skip_tests }} == true ]]; then
+            mvn -DskipTests clean package
+          else
+            mvn clean package
+          fi
 
       - name: Copy artifacts
         run: mkdir artifacts && cp cli/target/*-dependencies.jar artifacts
