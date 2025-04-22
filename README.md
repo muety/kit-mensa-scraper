@@ -16,7 +16,7 @@ Scrapes [KIT Mensa Speiseplan](https://www.sw-ka.de/en/hochschulgastronomie/spei
 * [x] Environment Score
 
 ## API Documentation
-JavaDoc available [here]([https://docs.muetsch.io/kit-mensa-scraper/edu/kit/aifb/atks/KITMensaScraper.html](https://docs.muetsch.io/kit-mensa-scraper/edu/kit/aifb/atks/mensascraper/lib/KITMensaScraper.html)).
+JavaDoc available [here](https://docs.muetsch.io/kit-mensa-scraper/edu/kit/aifb/atks/mensascraper/lib/KITMensaScraper.html).
 
 ## Usage Example
 
