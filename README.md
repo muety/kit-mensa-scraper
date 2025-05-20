@@ -21,13 +21,22 @@ JavaDoc available [here](https://docs.muetsch.io/kit-mensa-scraper/edu/kit/aifb/
 ## Usage Example
 
 ```java
+import java.time.LocalDate;
+import java.util.List;
 import edu.kit.aifb.atks.mensascraper.lib.*;
 
-public static void main(String[]args) {
-    final KITMensaScraper mensa = new KITMensaScraper();
-    final List<MensaMeal> meals = mensa.fetchMeals(MensaLocation.ADENAUERRING, LocalDate.now());
-    meals.forEach(System.out::println);
+public class Main {
+    public static void main(String[]args) {
+        final KITMensaScraper mensa = new KITMensaScraper();
+        final List<MensaMeal> meals = mensa.fetchMeals(MensaLocation.ADENAUERRING, LocalDate.now());
+        meals.forEach(System.out::println);
+    }
 }
+```
+
+### Run (from command-line)
+```bash
+java -cp mensascraper-lib-1.2.1.jar Main.java
 ```
 
 ### Output
