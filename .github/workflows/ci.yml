@@ -27,7 +27,7 @@ jobs:
 
       - name: Build and test
         run: |
-          if [[ ${{ inputs.skip_tests }} == true ]]; then
+          if [[ ${{ inputs.skip_tests || false }} == true ]]; then
             mvn -DskipTests clean package
           else
             mvn clean package
