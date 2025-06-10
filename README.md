@@ -36,7 +36,7 @@ public class Main {
 
 ### Run (from command-line)
 ```bash
-java -cp mensascraper-lib-1.2.1.jar Main.java
+java -cp mensascraper-lib-1.2.2.jar Main.java
 ```
 
 ### Output

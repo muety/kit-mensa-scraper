@@ -18,6 +18,25 @@ import java.util.Random;
 @Builder
 public class MensaMeal implements Serializable, Cloneable {
 
+    public MensaMeal(String name, MensaLine line, float price, MensaMealType type) {
+        this.name = name;
+        this.line = line;
+        this.price = price;
+        this.type = type;
+    }
+
+    public MensaMeal(String name, MensaLine line, float price, MensaMealType type, float kcal, float proteins, float carbs, float sugar, float fat, float saturated, float salt, List<String> additives) {
+        this(name, line, price, type);
+        this.kcal = kcal;
+        this.proteins = proteins;
+        this.carbs = carbs;
+        this.sugar = sugar;
+        this.fat = fat;
+        this.saturated = saturated;
+        this.salt = salt;
+        this.additives = additives;
+    }
+
     /**
      * Name of the meal.
      */
