@@ -17,11 +17,11 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
+          java-version: '21'
           distribution: 'temurin'
 
       - name: Download CLI JAR
-        uses: dawidd6/action-download-artifact@v3
+        uses: dawidd6/action-download-artifact@v10
         with:
           workflow: ci.yml
           workflow_conclusion: success
