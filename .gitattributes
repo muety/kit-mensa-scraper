@@ -1,1 +1,2 @@
 lib/src/test/resources/*.html -linguist-detectable
+*.ipynb -linguist-detectable
